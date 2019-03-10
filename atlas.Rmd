@@ -1,0 +1,415 @@
+---
+title: "Atlas of the distribution of skates and rays"
+author: "SUMARiS consortium"
+date: "December 2018"
+output: 
+  pdf_document:
+    toc: true
+    number_section: true
+    fig_crop: true
+    includes:
+      in_header: credo.sty
+
+bibliography: '/home/moi/datahome/work/biblio/enfin/biblioloran.bib'
+---
+
+# Framework 
+
+The atlas of the distribution of skates and rays belongs to the work package
+(WP) one of the project SUMARiS. 
+This WP aims to improve knowledge on rays' fisheries, in support of management
+decisions. This atlas is a deliverable of the activity 1.1 of the WP 1.
+Data related to skates and rays were collected from differents data providers
+and combined in order to map out their spatial distributions.
+
+The atlas of the spatial distribution of the different species of skates and
+rays in the Channel and the Southern North Sea is built on historical
+data per species and per fishery and information collected during the
+project, including reconstructed per-specie catches and landings, and
+new information from the fisheries campaigns
+
+This document is a reproducible document: its contents can be updated automatically
+according to the arrival of new information. 
+
+```{r global_options, include=T,cache=F,echo=F,warning=F,message=F,progress=F,verbose=F}
+#Quarterknitr option
+operationnel<-TRUE
+knitr::opts_chunk$set(echo=FALSE, 
+		      warning=!operationnel, 
+		      message=!operationnel,
+		      fig.height=8,
+		      progress=!operationnel,
+		      verbose=!operationnel,
+		      include=TRUE,dev='png',autodep=FALSE)
+#package
+library(COSTcore);library(COSTdbe);library(COSTeda)
+library(dplyr);library(tidyr);library(stringr)
+library(ggplot2);library(gridExtra)
+##library(openxlsx);library(mailR)
+library(pander);library(captioner)
+library(sf);library(mapdata)
+#library(DATRAS)
+#library(sparkTable)
+#local fct
+#source("credo_fct.R")
+#initialise les fonctions pour légender tables et figures
+tabcap <- captioner(prefix = "Table",level=2)
+figcap <- captioner(prefix = "Figure",level=2)
+
+```
+
+```{r data,cache=T}
+
+#load data
+cl<-readRDS("cl.rds")
+ce<-readRDS("ce.rds")
+if(F){
+cs<-readRDS("cs.rds")
+csuk<-readRDS("csuk.rds")
+cs<-rbind2(cs,csuk)
+saveRDS(cs,file="csall.rds")
+}
+cs<-readRDS("csall.rds")
+camp<-readRDS("camp.rds")
+camp<-camp%>%filter(HaulVal=="V")
+camp<-camp%>%filter(CatIdentifier!="-9")
+camp<-camp%>%filter(SpecVal!="0")
+camp$TotalNo[camp$TotalNo=="-9.00"]<-NA
+camp$TotalNo<-as.numeric(camp$TotalNo)
+camp0<-readRDS("camp0.rds")
+load("codespp.rdata")
+codespp<-codespp%>%transmute(taxon=ESPF_COD,spp=ESPF_SCI_LIB,ValidAphiaID=worms,name=ESPF_ENG_LIB,worms)%>%distinct()
+#spp correction
+#codespp%>%filter(agrepl("acanthias",spp))
+#cl ok
+#cs
+cs@sl$spp[cs@sl$spp=="Raja naevus"]<-"Leucoraja naevus"
+cs@hl$spp[cs@hl$spp=="Raja naevus"]<-"Leucoraja naevus"
+cs@sl$spp[cs@sl$spp=="Raja"]<-"Rajidae"
+cs@hl$spp[cs@hl$spp=="Raja"]<-"Rajidae"
+cs@sl$spp[cs@sl$spp=="Leucoraja fullonica"]<-"Raja fullonica"
+cs@hl$spp[cs@hl$spp=="Leucoraja fullonica"]<-"Raja fullonica"
+cs@sl$spp[cs@sl$spp=="Dipturus batis"]<-"Raja batis"
+cs@hl$spp[cs@hl$spp=="Dipturus batis"]<-"Raja batis"
+cs@sl$spp[cs@sl$spp=="Leucoraja circularis"]<-"Raja circularis"
+cs@hl$spp[cs@hl$spp=="Leucoraja circularis"]<-"Raja circularis"
+cs@sl$spp[cs@sl$spp=="Dipturus oxyrinchus"]<-"Raja oxyrinchus"
+cs@hl$spp[cs@hl$spp=="Dipturus oxyrinchus"]<-"Raja oxyrinchus"
+cs@sl$spp[cs@sl$spp=="Rajella fyllae"]<-"Raja fyllae"
+cs@hl$spp[cs@hl$spp=="Rajella fyllae"]<-"Raja fyllae"
+cs@sl$spp[cs@sl$spp=="Rostroraja alba"]<-"Raja alba"
+cs@hl$spp[cs@hl$spp=="Rostroraja alba"]<-"Raja alba"
+cs@sl$spp[cs@sl$spp=="Amblyraja radiata"]<-"Raja radiata"
+cs@hl$spp[cs@hl$spp=="Amblyraja radiata"]<-"Raja radiata"
+cs@sl$spp[cs@sl$spp=="Torpedo"]<-"Torpedo spp"
+cs@hl$spp[cs@hl$spp=="Torpedo"]<-"Torpedo spp"
+
+codespp<-codespp%>%filter(spp!="Leucoraja naevus")%>%mutate(spp=ifelse(spp=="Raja naevus","Leucoraja naevus",spp))
+
+#gearlist
+gearlist1<-cl%>%tidyr::separate(foCatEu6,into="gear",sep="_")%>%select(gear)%>%distinct()
+gearlist2<-cs@hh%>%tidyr::separate(foCatEu6,into="gear",sep="_")%>%select(gear)%>%distinct()
+gearlist<-rbind(gearlist1,gearlist2)%>%distinct()%>%arrange(gear)%>%mutate(gearcat="Other")
+gearlist$gearcat[gearlist$gear%in%c("DRB","OTB","OTM","OTT","PS","PTB","PTM","SDN","SSC","TBB")]<-"Trawler"
+gearlist$gearcat[gearlist$gear%in%c("FYK","GNC","GND","GNS","GTN","GTR")]<-"Net"
+gearlist$gearcat[gearlist$gear%in%c("LHM","LHP","LLD","LLS","LN","LTL")]<-"Line"
+
+
+
+#diag spp camp/cl/cs
+dcl<-cl%>%group_by(taxon)%>%summarise(w=sum(landWt,na.rm=T)/1000)%>%
+	left_join(codespp)%>%ungroup()%>%transmute(taxon,name,spp,worms,w)
+dcs<-left_join(left_join(cs@sl,cs@hh),cs@tr)%>%group_by(spp,flag=sampCtry)%>%summarise(wsamp=sum(wt,na.rm=T)/1000,nsamp=n_distinct(paste(trpCode,staNum)))%>%
+	ungroup()%>%
+	left_join(codespp)%>%ungroup()%>%transmute(taxon,name,spp,worms,flag,nsamp)
+dcs<-tidyr::spread(dcs,flag,nsamp,fill=0)
+dcamp<-camp%>%group_by(ValidAphiaID,Survey)%>%
+	summarise(ncamp=n_distinct(paste(Survey,StNo,HaulNo,Year,Month,Day,TimeShot)),nbind=sum(TotalNo,na.rm=T))%>%
+	left_join(codespp)%>%ungroup()%>%select(taxon,name,spp,worms,Survey,ncamp)
+dcamp<-tidyr::spread(dcamp,Survey,ncamp,fill=0)
+
+#camp%>%select(Survey,StNo,HaulNo,Year)%>%distinct()%>%dim()
+
+dall<-full_join(full_join(dcl,dcs),dcamp)#%>%arrange(desc(w),desc(nsamp),desc(ncamp))#%>%filter(nsamp>100&!is.na(nbcamp))
+#dall%>%filter(is.na(taxon)|is.na(name))
+#dall%>%arrange(desc(w))%>%View()
+dall<-dall%>%filter(w>2)%>%arrange(desc(w))
+#dall%>%View()
+#remove strange species
+
+
+#geography
+load("../../data/refTables/geosihsextant/rect.rdata")
+load("../../data/refTables/geosihsextant/div.rdata")
+#prepa data
+listdiv<-c("27.7.d","27.7.e","27.4.b","27.4.c")
+div<-div%>%filter(F_DIVISION%in%listdiv)%>%transmute(div=F_DIVISION,label=ETIQUETTE,geometry)
+divxy<-st_coordinates(st_centroid(div))
+div$x<-divxy[,1]
+div$y<-divxy[,2]
+#rect<-rect%>%filter(F_DIVISION=="27.7.d")
+rect<-rect%>%filter(F_DIVISION%in%listdiv)%>%
+	transmute(rect=ICESNAME,div=F_DIVISION,label=ICESNAME,geometry)
+rectxy<-st_coordinates(st_centroid(rect))
+rect$x<-round(rectxy[,1],3)
+rect$y<-round(rectxy[,2],3)
+
+rx<-range(rect$x)
+ry<-range(rect$y)
+
+mapbase<-ggplot()+geom_sf(data=div,fill=NA,colour="black",lwd=2)+
+    geom_sf(data=rect,fill=NA,alpha=.2)+
+    borders("worldHires",xlim=rx,ylim=ry,fill="grey",alpha=.5)+
+    geom_sf_label(data=div,aes(label=div))+
+    coord_sf(xlim=rx,ylim=ry)+
+    theme_bw()+ggtitle("")+xlab("Longitude")+ylab("Latitude")
+    #borders("worldHires",xlim=range(status1$x),ylim=range(status1$y),fill="grey")+
+
+
+
+```
+
+## Data
+
+Data were collected from three sources: 
+
+- landing: from logbooks and sales notes collected at the national level, the
+  landings weights are reported in space and time,
+- commercial sampling: fishery catches are sampled at the national level and
+  they provide information in weights and size of the catches (landings and
+  discards),
+- survey sampling: fishery survey provide indices of the species distribution
+  (density...), and biological information of the individuals (size, weights,
+  sex, maturity). 
+  
+
+## Preprocessing
+
+### Data format
+
+Data format follows the DATRAS format [@datras] and the fishframe format [@cost2009].
+The metier level 6 have been grouped in 4 categories to simplify the outputs:
+
+- trawler: all the active gears (OTB, PTM, OTT, TBB...),
+- net: all the passive gears (GTN, GTR...),
+- line: all the gears based on lines and hooks (LHM, LLS...),
+- other: all the other gears (MIS, FPO...).
+
+
+### Data filtering
+
+The time range is fixed to the year 2000 to 2017.
+In space, the ICES division on which the data are mapped are the divisions
+27.4.b, 27.4.c, 27.7.d and 27.7.e (`r figcap("mapbase",display="cite")`).
+Only the rays and skates species are extracted from the different data sources.
+
+```{r mapbase,cache=T,fig.width=5,fig.height=5}
+print(mapbase)
+```
+
+`r figcap(name="mapbase",caption="area of interest.")`
+
+### Maps
+
+For each species, by data source, a set of map is processed. If no information is available, the related map is empty and contains the message
+"no information available".
+Data are mapped on the ICES statistical rectangle. The information presented on the map (weights, CPUE...) is aggregated using
+the sum or the average of the values in each statistical rectangle. Annual values are aggregated following the same process.
+Catch per unit effort are computed using fishing weight divided by the time fishing in hour.
+
+## Data overview
+
+An overview of the data is presented in the `r tabcap("tabbase",display="cite")`.
+```{r tabbase}
+pander(dall)
+```
+`r tabcap(name="tabbase",caption="Landing (w, in kg), number of sampling in commercial sampling by country (FRA: France, GB_ENG: England) and 
+survey (BTS, FR-CGFS, NS-IBTS) for 2000-2017 by species (taxon: FAO code, name: common name, spp: latin name, worms: worms code).")`
+
+```{r surveypreprocessing,cache=T}
+#survey
+#c0<-camp%>%filter(ValidAphiaID==105883)%>%mutate(w=as.numeric(CatCatchWgt),x=
+#camp$ShootLong<-as.numeric(camp$ShootLong)
+#camp$HaulLong<-as.numeric(camp$HaulLong)
+#camp$HaulLat<-as.numeric(camp$HaulLat)
+#camp$d2<-geosphere::distHaversine(camp[,c("ShootLong","ShootLat")],camp[,c("HaulLong","HaulLat")])
+#ggplot(camp%>%filter(HaulLat>0),aes(x=d2,y=Distance))+geom_point()
+#plot(as.numeric(camp$Distance),d2)
+
+
+campsimple<-camp%>%#filter(ValidAphiaID==105883)%>%
+	transmute(samp="sci",survey=Survey,id=paste(Survey,Year,StNo,HaulNo),catchCat="SCI",spp=ValidAphiaID,sex=Sex,rect=StatRec,
+			 year=Year,month=Month,gear=Gear,
+			 x1=as.numeric(ShootLong),y1=as.numeric(ShootLat),
+			 x2=as.numeric(HaulLong),y2=as.numeric(HaulLat),
+			 d=as.numeric(Distance),l=as.numeric(WingSpread),time=as.numeric(HaulDur),
+			 w=as.numeric(CatCatchWgt),n=TotalNo,type=DataType)%>%distinct()
+campsimple[campsimple==-9]<-NA
+campsimple0<-camp0%>%#filter(ValidAphiaID==105883)%>%
+	transmute(samp="sci",survey=Survey,id=paste(Survey,Year,StNo,HaulNo),catchCat="SCI",rect=StatRec,
+			 year=Year,month=Month,gear=Gear,
+			 x1=as.numeric(ShootLong),y1=as.numeric(ShootLat),
+			 x2=as.numeric(HaulLong),y2=as.numeric(HaulLat),
+			 d=as.numeric(Distance),l=as.numeric(WingSpread),time=as.numeric(HaulDur))%>%distinct()
+campsimple0[campsimple0==-9]<-NA
+nbcampspp<-unique(camp$ValidAphiaID)
+campsimple1<-campsimple0[rep(seq_len(nrow(campsimple0)),length(nbcampspp)),]
+campsimple1$spp<-rep(nbcampspp,each=nrow(campsimple0))
+campsimple<-left_join(campsimple1,campsimple)
+
+#missing length
+campsimple$d2<-geosphere::distHaversine(campsimple[,c("x1","y1")],campsimple[,c("x2","y2")])
+campsimple<-campsimple%>%mutate(d=ifelse(is.na(d),d2,d))%>%select(-d2)
+#missing time 
+#campsimple%>%tidyr::separate(id,into=c("id0"),sep=" ")%>%group_by(id0=paste(id0,year))%>%summarise(l=mean(l,na.rm=T))%>%View()
+#0 in w and n
+campsimple$w[is.na(campsimple$w)]<-0
+campsimple$n[is.na(campsimple$n)]<-0
+#campall<-campsimple%>%group_by(survey,spp,rect,year)%>%summarise(w=mean(w),n=sum(n),time=sum(time))%>%ungroup()%>%left_join(rect)
+#campyear<-campsimple%>%group_by(survey,spp,rect,year)%>%summarise(w=mean(w),n=sum(n),time=sum(time))%>%ungroup()%>%left_join(rect)
+campallsum<-campsimple%>%group_by(survey,spp,rect)%>%summarise(w=sum(w),n=sum(n),time=sum(time))%>%ungroup()%>%left_join(rect)
+campallmean<-campsimple%>%group_by(survey,spp,rect)%>%summarise(w=mean(w),n=mean(n),time=mean(time))%>%ungroup()%>%left_join(rect)
+campyearsum<-campsimple%>%group_by(survey,spp,rect,year)%>%summarise(w=sum(w),n=sum(n),time=sum(time))%>%ungroup()%>%left_join(rect)
+campyearmean<-campsimple%>%group_by(survey,spp,rect,year)%>%summarise(w=mean(w),n=mean(n),time=mean(time))%>%ungroup()%>%left_join(rect)
+
+```
+
+```{r clpreprocessing,cache=T}
+clallsum<-cl%>%
+	group_by(country=as.factor(vslFlgCtry),rect,taxon)%>%
+	summarise(w=sum(landWt)/1000)%>%ungroup()%>%
+	filter(rect!="") %>%left_join(rect)
+clallgearsum<-cl%>%tidyr::separate(foCatEu6,into="gear",sep="_")%>%
+        left_join(gearlist)%>%
+	group_by(country=as.factor(vslFlgCtry),rect,gear=gearcat,taxon)%>%
+	summarise(w=sum(landWt)/1000)%>%ungroup()%>%
+	filter(rect!="") %>%left_join(rect)
+clallyearsum<-cl%>%
+	group_by(rect,taxon,year=as.factor(year))%>%
+	summarise(w=sum(landWt)/1000)%>%ungroup()%>%
+	filter(rect!="") %>%left_join(rect)
+clallyeargearsum<-cl%>%tidyr::separate(foCatEu6,into="gear",sep="_")%>%
+        left_join(gearlist)%>%
+	group_by(country=as.factor(vslFlgCtry),rect,gear=gearcat,taxon,year=as.factor(year))%>%
+	summarise(w=sum(landWt)/1000)%>%ungroup()%>%
+	filter(rect!="") %>%left_join(rect)
+```
+
+```{r cspreprocessing,eval=T}
+#quick correction
+cs@hh$foDur[cs@hh$foDur<0]<-NA
+cs0<-left_join(left_join(cs@sl,cs@hh),cs@tr)%>%
+	group_by(country=sampCtry,trpCode,staNum,spp,catchCat,date,year,foCatEu6,rect,x1=lonIni,y1=latIni,x2=lonFin,y2=latFin,foDur)%>%
+	summarise(w=sum(wt,na.rm=T))%>%ungroup()
+csallmean<-cs0%>%group_by(country=as.factor(country),spp,rect,catchCat=as.factor(catchCat))%>%summarise(w=mean(w)/1000,time=sum(foDur)/60)%>%left_join(rect)
+csallyearmean<-cs0%>%group_by(spp,rect,year=as.factor(year))%>%summarise(w=mean(w)/1000,time=sum(foDur)/60)%>%left_join(rect)
+csallyeargearmean<-cs0%>%
+	tidyr::separate(foCatEu6,into="gear",sep="_")%>%
+        left_join(gearlist)%>%
+	group_by(spp,rect,year=as.factor(year),gear=gearcat)%>%summarise(w=mean(w)/1000,time=sum(foDur)/60)%>%left_join(rect)
+
+
+if(F){
+#x11(h=4)
+#pipo<-campall%>%filter(spp=={{worms}})
+pipo<-csallyearmean%>%filter(spp=="Raja clavata")
+aa<-ggplot()+
+    geom_raster(data=pipo,aes(x=x,y=y,fill=w),stat="identity",alpha=1) +
+    scale_fill_distiller(palette='Spectral',name="CPUE\n(tons)",trans="log10")+
+    borders("world",xlim=rx,ylim=ry,fill="grey",colour=NA,alpha=1)+
+    coord_quickmap(xlim=rx,ylim=ry)+
+    facet_wrap(~year,drop=F)+
+    theme_bw()+ggtitle("Landings: {{spp}}")+xlab("Longitude")+ylab("Latitude")
+
+}
+
+
+```
+
+
+
+```{r testarea,eval=F,include=F}
+if(F){
+#survey1
+#x11(h=4)
+#pipo<-campall%>%filter(spp=={{worms}})
+pipo<-campallmean%>%filter(spp==105883)
+uu<-ggplot()+
+    geom_raster(data=pipo,aes(x=x,y=y,fill=(w/1000)/(time/60)),stat="identity",alpha=1,colour="black")+
+   #geom_sf(data=div,fill=NA,colour="black",lwd=1)+
+    scale_fill_distiller(palette='Spectral',name="CPUE\n(kg.h-1)",trans="log10")+
+    #geom_sf(data=rect,fill=NA,alpha=1,lwd=.1)+
+    borders("world",xlim=rx,ylim=ry,fill="grey",colour=NA,alpha=1)+
+    #geom_sf_label(data=div,aes(label=div))+
+    #coord_sf(xlim=rx,ylim=ry)+
+    coord_quickmap(xlim=rx,ylim=ry)+
+    facet_wrap(~survey)+
+    theme_bw()+ggtitle("{{spp}}")+xlab("Longitude")+ylab("Latitude")
+
+#pipo<-campall%>%filter(spp=={{worms}})
+pipo<-campyearmean%>%filter(spp==105883&survey=="BTS")
+#x11(w=8,h=10)
+aa<-ggplot()+#geom_sf(data=div,fill=NA,colour="black",lwd=2)+
+    geom_raster(data=pipo,aes(x=x,y=y,fill=(w/1000)/(time/60)),stat="identity",alpha=1)+
+    facet_wrap(~year,ncol=4)+
+    scale_fill_distiller(palette='Spectral',name="CPUE\n(kg.h-1)",trans="log10")+
+    #geom_sf(data=rect,fill=NA,alpha=.2,lwd=.1)+
+    #borders("worldHires",xlim=rx,ylim=ry,fill="grey",colour=NA,alpha=1)+
+    borders("world",xlim=rx,ylim=ry,fill="grey",colour=NA,alpha=1)+
+    #geom_sf_label(data=div,aes(label=div))+
+    #coord_sf(xlim=rx,ylim=ry)+
+    coord_quickmap(xlim=rx,ylim=ry)+
+    theme_bw()+ggtitle("BTS: {{spp}}")+xlab("Longitude")+ylab("Latitude")
+pipo<-campallmean%>%filter(spp==105711)#%>%filter(w==0)
+plt<-ggplot()+#geom_sf(data=div,fill=NA,colour="black",lwd=2)+
+    geom_raster(data=pipo,aes(x=x,y=y,fill=(w/1000)/(time/60)),stat="identity",alpha=1)+
+    borders("world",xlim=rx,ylim=ry,fill="grey",colour=NA,alpha=1)+
+    coord_quickmap(xlim=rx,ylim=ry)+
+    facet_wrap(~survey,drop=FALSE)+
+    theme_bw()+ggtitle("Rajidae")+xlab("Longitude")+ylab("Latitude")
+
+    plt+scale_fill_distiller(palette='Spectral',name="CPUE\n(kg.h-1)",trans="log10")
+}
+```
+
+
+\newpage
+
+
+```{r chapter0}
+    rmd1<-knitr::knit_expand("expand_atlas.Rmd", spp = dall$spp[1],worms=dall$worms[1],taxon=dall$taxon[1])
+    rmd<-rmd1
+    for(i in 2:nrow(dall)){
+      rmdtmp<-knitr::knit_expand("expand_atlas.Rmd", spp = dall$spp[i],worms=dall$worms[i],taxon=dall$taxon[i])
+      rmd<-paste(rmd,rmdtmp,collapse="\n")
+    }
+    #for(i in 
+    #rmd2<-knitr::knit_expand("expand_atlas.Rmd", spp = dall$spp[10],worms=dall$worms[10],taxon=dall$taxon[10])
+    #rmd3<-knitr::knit_expand("expand_atlas.Rmd", spp = dall$spp[2],worms=dall$worms[2],taxon=dall$taxon[2])
+    #rmd<-paste(rmd1,rmd2,collapse="\n")
+    #rmd<-rmd1
+
+    #cat(rmd)
+#pipo<-data.frame(a="a",b="b")
+#rmd <- sapply(
+#  dall,
+#  function(pipo) {
+#    knitr::knit_expand("expand_atlas.Rmd", spp = pipo[3],worms=pipo[4])
+#  }
+#)
+
+#sapply(list(1:3,5:6,function(i,j){ knitr::knit_expand(text=c("## {{spp}} {{aka}}"),spp=i,aka=j)})
+
+#rmd <- paste(rmd, collapse = "\n")
+#cat(rmd)
+``` 
+
+```{r rendertruc,results = "asis"}
+rendered <- knitr::knit(text = rmd, quiet = TRUE)
+cat(rendered, sep = "\n")
+``` 
+
+\newpage
+
+# Bibliography
+

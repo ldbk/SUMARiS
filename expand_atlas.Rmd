@@ -1,0 +1,451 @@
+# {{spp}}
+
+```{r prepa{{worms}}}
+bump(figcap,1)
+bump(tabcap,1)
+errorplt<-ggplot()+geom_text(data=data.frame(label="No information available",x=0,y=0),aes(x=x,y=y,label=label),size=10)
+
+```
+
+## Survey
+
+### Average CPUE
+
+```{r campallmean{{worms}},fig.height=3.5}
+pipo<-campallmean%>%filter(spp=={{worms}})
+pipo0<-data.frame(x=5,y=50)
+if(nrow(pipo)>0){
+plt<-ggplot()+#geom_sf(data=div,fill=NA,colour="black",lwd=2)+
+    geom_raster(data=pipo,aes(x=x,y=y,fill=(w/1000)/(time/60)),stat="identity",alpha=1)+
+    borders("world",xlim=rx,ylim=ry,fill="grey",colour=NA,alpha=1)+
+    coord_quickmap(xlim=rx,ylim=ry)+
+    facet_wrap(~survey,drop=FALSE)+
+    theme_bw()+ggtitle("{{spp}}")+xlab("Longitude")+ylab("Latitude")
+	if(min(pipo$w)!=max(pipo$w)){
+	    plt<-plt+scale_fill_distiller(palette='Spectral',name="CPUE\n(kg.h-1)",trans="log10")
+	}else{
+	    plt<-plt+scale_fill_distiller(palette='Spectral',name="CPUE\n(kg.h-1)")
+	}
+}else{
+ plt<-errorplt+
+    theme_bw()+ggtitle("{{spp}}")+xlab("Longitude")+ylab("Latitude")
+}
+print(plt)
+```
+
+`r figcap(name="campallmean{{worms}}",caption="Average catch per unit effort (kg per hour) for the surveys. The color scale is log 10 transformed.")`
+
+### Annual CPUE: BTS
+
+```{r campyearmean1{{worms}},fig.height=10,fig.width=8}
+pipo<-campyearmean%>%filter(spp=={{worms}}&survey=="BTS")
+if(nrow(pipo)>0){
+plt<-ggplot()+#geom_sf(data=div,fill=NA,colour="black",lwd=2)+
+    geom_raster(data=pipo,aes(x=x,y=y,fill=(w/1000)/(time/60)),stat="identity",alpha=1)+
+    facet_wrap(~year,ncol=4,drop=FALSE)+
+    borders("world",xlim=rx,ylim=ry,fill="grey",colour=NA,alpha=1)+
+    coord_quickmap(xlim=rx,ylim=ry)+
+    theme_bw()+ggtitle("BTS: {{spp}}")+xlab("Longitude")+ylab("Latitude")
+	if(min(pipo$w)!=max(pipo$w)){
+	    plt<-plt+scale_fill_distiller(palette='Spectral',name="CPUE\n(kg.h-1)",trans="log10")
+	}else{
+	    plt<-plt+scale_fill_distiller(palette='Spectral',name="CPUE\n(kg.h-1)")
+	}
+}else{
+ plt<-errorplt+
+    theme_bw()+ggtitle("BTS: {{spp}}")+xlab("Longitude")+ylab("Latitude")
+}
+print(plt)
+```
+
+`r figcap(name="campyearmean1{{worms}}",caption="Average catch per unit effort (kg per hour) for the BTS survey. The color scale is log 10 transformed.")`
+
+
+### Annual CPUE: FR-CGFS 
+
+```{r campyearmean2{{worms}},fig.height=10,fig.width=8}
+pipo<-campyearmean%>%filter(spp=={{worms}}&survey=="FR-CGFS")
+if(nrow(pipo)>0){
+plt<-ggplot()+#geom_sf(data=div,fill=NA,colour="black",lwd=2)+
+    geom_raster(data=pipo,aes(x=x,y=y,fill=(w/1000)/(time/60)),stat="identity",alpha=1)+
+    facet_wrap(~year,ncol=4,drop=FALSE)+
+    borders("world",xlim=rx,ylim=ry,fill="grey",colour=NA,alpha=1)+
+    coord_quickmap(xlim=rx,ylim=ry)+
+    theme_bw()+ggtitle("FR-CGFS: {{spp}}")+xlab("Longitude")+ylab("Latitude")
+	if(min(pipo$w)!=max(pipo$w)){
+	    plt<-plt+scale_fill_distiller(palette='Spectral',name="CPUE\n(kg.h-1)",trans="log10")
+	}else{
+	    plt<-plt+scale_fill_distiller(palette='Spectral',name="CPUE\n(kg.h-1)")
+	}
+}else{
+ plt<-errorplt+
+    theme_bw()+ggtitle("FR-CGFS: {{spp}}")+xlab("Longitude")+ylab("Latitude")
+}
+print(plt)
+```
+
+`r figcap(name="campyearmean2{{worms}}",caption="Average catch per unit effort (kg per hour) for the FR-CGFS survey. The color scale is log 10 transformed.")`
+
+### Annual CPUE: NS-IBTS 
+
+```{r campyearmean3{{worms}},fig.height=10,fig.width=8}
+pipo<-campyearmean%>%filter(spp=={{worms}}&survey=="NS-IBTS")
+if(nrow(pipo)>0){
+plt<-ggplot()+#geom_sf(data=div,fill=NA,colour="black",lwd=2)+
+    geom_raster(data=pipo,aes(x=x,y=y,fill=(w/1000)/(time/60)),stat="identity",alpha=1)+
+    facet_wrap(~year,ncol=4,drop=FALSE)+
+    borders("world",xlim=rx,ylim=ry,fill="grey",colour=NA,alpha=1)+
+    coord_quickmap(xlim=rx,ylim=ry)+
+    theme_bw()+ggtitle("NS-IBTS: {{spp}}")+xlab("Longitude")+ylab("Latitude")
+	if(min(pipo$w)!=max(pipo$w)){
+	    plt<-plt+scale_fill_distiller(palette='Spectral',name="CPUE\n(kg.h-1)",trans="log10")
+	}else{
+	    plt<-plt+scale_fill_distiller(palette='Spectral',name="CPUE\n(kg.h-1)")
+	}
+}else{
+ plt<-errorplt+
+    theme_bw()+ggtitle("NS-IBTS: {{spp}}")+xlab("Longitude")+ylab("Latitude")
+}
+print(plt)
+```
+
+`r figcap(name="campyearmean3{{worms}}",caption="Average catch per unit effort (kg per hour) for the NS-IBTS survey. The color scale is log 10 transformed.")`
+
+## Fishery dependent information
+
+### Landings
+
+#### Landings by country
+
+```{r clallsum{{worms}},fig.height=3.5}
+pipo<-clallsum%>%filter(taxon=="{{taxon}}")
+if(nrow(pipo)>0){
+plt<-ggplot()+
+    geom_raster(data=pipo,aes(x=x,y=y,fill=w),stat="identity",alpha=1)+
+    borders("world",xlim=rx,ylim=ry,fill="grey",colour=NA,alpha=1)+
+    coord_quickmap(xlim=rx,ylim=ry)+
+    facet_wrap(~country,drop=FALSE)+
+    theme_bw()+ggtitle("Cumulative landings: {{spp}}")+xlab("Longitude")+ylab("Latitude")
+	if(min(pipo$w)!=max(pipo$w)){
+	    plt<-plt+scale_fill_distiller(palette='Spectral',name="Landings\n(tons)",trans="log10")
+	}else{
+	    plt<-plt+scale_fill_distiller(palette='Spectral',name="Landings\n(tons)")
+	}
+}else{
+ plt<-errorplt+
+    theme_bw()+ggtitle("Cumulative landings: {{spp}}")+xlab("Longitude")+ylab("Latitude")
+}
+print(plt)
+```
+
+`r figcap(name="clallsum{{worms}}",caption="Sum of landings (in tons) per country. The color scale is log 10 transformed.")`
+
+#### Landings by country and gear category
+
+```{r clallgearsum{{worms}},fig.height=3.5}
+pipo<-clallgearsum%>%filter(taxon=="{{taxon}}")
+if(nrow(pipo)>0){
+plt<-ggplot()+
+    geom_raster(data=pipo,aes(x=x,y=y,fill=w),stat="identity",alpha=1) +
+    borders("world",xlim=rx,ylim=ry,fill="grey",colour=NA,alpha=1)+
+    coord_quickmap(xlim=rx,ylim=ry)+
+    facet_grid(country~gear,drop=FALSE)+
+    theme_bw()+ggtitle("Cumulative landings: {{spp}}")+xlab("Longitude")+ylab("Latitude")
+	if(min(pipo$w)!=max(pipo$w)){
+	    plt<-plt+scale_fill_distiller(palette='Spectral',name="Landings\n(tons)",trans="log10")
+	}else{
+	    plt<-plt+scale_fill_distiller(palette='Spectral',name="Landings\n(tons)")
+	}
+}else{
+ plt<-errorplt+
+    theme_bw()+ggtitle("Cumulative landings: {{spp}}")+xlab("Longitude")+ylab("Latitude")
+}
+print(plt)
+```
+
+`r figcap(name="clallgearsum{{worms}}",caption="Sum of landings (in tons) per gear category and country. The color scale is log 10 transformed.")`
+
+#### Annual landings
+
+```{r clallyearsum{{worms}},fig.height=10,fig.width=8}
+pipo<-clallyearsum%>%filter(taxon=="{{taxon}}")
+if(nrow(pipo)>0){
+plt<-ggplot()+#geom_sf(data=div,fill=NA,colour="black",lwd=2)+
+    geom_raster(data=pipo,aes(x=x,y=y,fill=w),stat="identity",alpha=1)+
+    facet_wrap(~year,ncol=4,drop=FALSE)+
+    borders("world",xlim=rx,ylim=ry,fill="grey",colour=NA,alpha=1)+
+    coord_quickmap(xlim=rx,ylim=ry)+
+    theme_bw()+ggtitle("Cumulative landings: {{spp}}")+xlab("Longitude")+ylab("Latitude")
+	if(min(pipo$w)!=max(pipo$w)){
+	    plt<-plt+scale_fill_distiller(palette='Spectral',name="Landings\n(tons)",trans="log10")
+	}else{
+	    plt<-plt+scale_fill_distiller(palette='Spectral',name="Landings\n(tons)")
+	}
+}else{
+ plt<-errorplt+
+    theme_bw()+ggtitle("Cumulative landings: {{spp}}")+xlab("Longitude")+ylab("Latitude")
+}
+print(plt)
+```
+
+`r figcap(name="clallyearsum{{worms}}",caption="Sum of landings (in tons) per year. The color scale is log 10 transformed.")`
+
+#### Annual landings for gear category trawler
+
+```{r clallyeargearsumtrawler{{worms}},fig.height=10,fig.width=8}
+pipo<-clallyeargearsum%>%filter(taxon=="{{taxon}}"&gear=="Trawler")
+if(nrow(pipo)>0){
+plt<-ggplot()+#geom_sf(data=div,fill=NA,colour="black",lwd=2)+
+    geom_raster(data=pipo,aes(x=x,y=y,fill=w),stat="identity",alpha=1)+
+    facet_wrap(~year,ncol=4,drop=FALSE)+
+    borders("world",xlim=rx,ylim=ry,fill="grey",colour=NA,alpha=1)+
+    coord_quickmap(xlim=rx,ylim=ry)+
+    theme_bw()+ggtitle("Cumulative landings for trawler: {{spp}}")+xlab("Longitude")+ylab("Latitude")
+	if(min(pipo$w)!=max(pipo$w)){
+	    plt<-plt+scale_fill_distiller(palette='Spectral',name="Landings\n(tons)",trans="log10")
+	}else{
+	    plt<-plt+scale_fill_distiller(palette='Spectral',name="Landings\n(tons)")
+	}
+}else{
+ plt<-errorplt+
+    theme_bw()+ggtitle("Cumulative landings for trawler: {{spp}}")+xlab("Longitude")+ylab("Latitude")
+}
+print(plt)
+```
+
+`r figcap(name="clallyeargearsumtrawler{{worms}}",caption="Sum of landings (in tons) per year. The color scale is log 10 transformed.")`
+
+
+#### Annual landings for gear category nets 
+
+```{r clallyeargearsumnet{{worms}},fig.height=10,fig.width=8}
+pipo<-clallyeargearsum%>%filter(taxon=="{{taxon}}"&gear=="Net")
+if(nrow(pipo)>0){
+plt<-ggplot()+#geom_sf(data=div,fill=NA,colour="black",lwd=2)+
+    geom_raster(data=pipo,aes(x=x,y=y,fill=w),stat="identity",alpha=1)+
+    facet_wrap(~year,ncol=4,drop=FALSE)+
+    borders("world",xlim=rx,ylim=ry,fill="grey",colour=NA,alpha=1)+
+    coord_quickmap(xlim=rx,ylim=ry)+
+    theme_bw()+ggtitle("Cumulative landings for net: {{spp}}")+xlab("Longitude")+ylab("Latitude")
+	if(min(pipo$w)!=max(pipo$w)){
+	    plt<-plt+scale_fill_distiller(palette='Spectral',name="Landings\n(tons)",trans="log10")
+	}else{
+	    plt<-plt+scale_fill_distiller(palette='Spectral',name="Landings\n(tons)")
+	}
+}else{
+ plt<-errorplt+
+    theme_bw()+ggtitle("Cumulative landings for net: {{spp}}")+xlab("Longitude")+ylab("Latitude")
+}
+print(plt)
+```
+
+`r figcap(name="clallyeargearsumnet{{worms}}",caption="Sum of landings (in tons) per year. The color scale is log 10 transformed.")`
+
+
+#### Annual landings for gear category lines 
+
+```{r clallyeargearsumline{{worms}},fig.height=10,fig.width=8}
+pipo<-clallyeargearsum%>%filter(taxon=="{{taxon}}"&gear=="Line")
+if(nrow(pipo)>0){
+plt<-ggplot()+#geom_sf(data=div,fill=NA,colour="black",lwd=2)+
+    geom_raster(data=pipo,aes(x=x,y=y,fill=w),stat="identity",alpha=1)+
+    facet_wrap(~year,ncol=4,drop=FALSE)+
+    borders("world",xlim=rx,ylim=ry,fill="grey",colour=NA,alpha=1)+
+    coord_quickmap(xlim=rx,ylim=ry)+
+    theme_bw()+ggtitle("Cumulative landings for line: {{spp}}")+xlab("Longitude")+ylab("Latitude")
+	if(min(pipo$w)!=max(pipo$w)){
+	    plt<-plt+scale_fill_distiller(palette='Spectral',name="Landings\n(tons)",trans="log10")
+	}else{
+	    plt<-plt+scale_fill_distiller(palette='Spectral',name="Landings\n(tons)")
+	}
+}else{
+ plt<-errorplt+
+    theme_bw()+ggtitle("Cumulative landings for line: {{spp}}")+xlab("Longitude")+ylab("Latitude")
+}
+print(plt)
+```
+
+`r figcap(name="clallyeargearsumline{{worms}}",caption="Sum of landings (in tons) per year. The color scale is log 10 transformed.")`
+
+
+#### Annual landings for gear category other 
+
+```{r clallyeargearsumother{{worms}},fig.height=10,fig.width=8}
+pipo<-clallyeargearsum%>%filter(taxon=="{{taxon}}"&gear=="Other")
+if(nrow(pipo)>0){
+plt<-ggplot()+#geom_sf(data=div,fill=NA,colour="black",lwd=2)+
+    geom_raster(data=pipo,aes(x=x,y=y,fill=w),stat="identity",alpha=1)+
+    facet_wrap(~year,ncol=4,drop=FALSE)+
+    borders("world",xlim=rx,ylim=ry,fill="grey",colour=NA,alpha=1)+
+    coord_quickmap(xlim=rx,ylim=ry)+
+    theme_bw()+ggtitle("Cumulative landings for other: {{spp}}")+xlab("Longitude")+ylab("Latitude")
+	if(min(pipo$w)!=max(pipo$w)){
+	    plt<-plt+scale_fill_distiller(palette='Spectral',name="Landings\n(tons)",trans="log10")
+	}else{
+	    plt<-plt+scale_fill_distiller(palette='Spectral',name="Landings\n(tons)")
+	}
+}else{
+ plt<-errorplt+
+    theme_bw()+ggtitle("Cumulative landings for other: {{spp}}")+xlab("Longitude")+ylab("Latitude")
+}
+print(plt)
+```
+
+`r figcap(name="clallyeargearsumother{{worms}}",caption="Sum of landings (in tons) per year. The color scale is log 10 transformed.")`
+
+### Commercial sampling
+
+#### Landings and discards per unit effort and country
+
+```{r csallmean{{worms}},fig.height=5,fig.width=5}
+pipo<-csallmean%>%filter(spp=="{{spp}}")
+if(nrow(pipo)>0){
+
+plt<-ggplot()+
+    geom_raster(data=pipo,aes(x=x,y=y,fill=w),stat="identity",alpha=1) +
+    borders("world",xlim=rx,ylim=ry,fill="grey",colour=NA,alpha=1)+
+    coord_quickmap(xlim=rx,ylim=ry)+
+    facet_grid(catchCat~country,drop=F)+
+    theme_bw()+ggtitle("Landings and discards per unit effort: {{spp}}")+xlab("Longitude")+ylab("Latitude")
+	if(min(pipo$w)!=max(pipo$w)){
+	    plt<-plt+scale_fill_distiller(palette='Spectral',name="CPUE\n(kg.h-1)",trans="log10")
+	}else{
+	    plt<-plt+scale_fill_distiller(palette='Spectral',name="CPUE\n(kg.h-1)")
+	}
+}else{
+ plt<-errorplt+
+    theme_bw()+ggtitle("Landings and discards per unit effort: {{spp}}")+xlab("Longitude")+ylab("Latitude")
+}
+print(plt)
+```
+
+`r figcap(name="csallmean{{worms}}",caption="Average landing (LAN) and discard (DIS) per hour fishing by country(FRA: France, GB_ENG: England). The color scale is log 10 transformed.")`
+
+#### Annual catch per unit effort
+
+```{r csallyearmean{{worms}},fig.height=10,fig.width=8}
+pipo<-csallyearmean%>%filter(spp=="{{spp}}")
+if(nrow(pipo)>0){
+plt<-ggplot()+
+    geom_raster(data=pipo,aes(x=x,y=y,fill=w),stat="identity",alpha=1) +
+    borders("world",xlim=rx,ylim=ry,fill="grey",colour=NA,alpha=1)+
+    coord_quickmap(xlim=rx,ylim=ry)+
+    facet_wrap(~year,drop=F,ncol=4)+
+    theme_bw()+ggtitle("Annual CPUE: {{spp}}")+xlab("Longitude")+ylab("Latitude")
+	if(min(pipo$w)!=max(pipo$w)){
+	    plt<-plt+scale_fill_distiller(palette='Spectral',name="CPUE\n(kg.h-1)",trans="log10")
+	}else{
+	    plt<-plt+scale_fill_distiller(palette='Spectral',name="CPUE\n(kg.h-1)")
+	}
+}else{
+ plt<-errorplt+
+    theme_bw()+ggtitle("Annual CPUE: {{spp}}")+xlab("Longitude")+ylab("Latitude")
+}
+print(plt)
+```
+
+`r figcap(name="csallyearmean{{worms}}",caption="Catches per unit effort per year. The color scale is log 10 transformed.")`
+
+#### Annual catch per unit effort for gear category trawler
+
+```{r csallyeargearmeantrawler{{worms}},fig.height=10,fig.width=8}
+pipo<-csallyeargearmean%>%filter(spp=="{{spp}}"&gear=="Trawler")
+if(nrow(pipo)>0){
+plt<-ggplot()+
+    geom_raster(data=pipo,aes(x=x,y=y,fill=w),stat="identity",alpha=1) +
+    borders("world",xlim=rx,ylim=ry,fill="grey",colour=NA,alpha=1)+
+    coord_quickmap(xlim=rx,ylim=ry)+
+    facet_wrap(~year,drop=F,ncol=4)+
+    theme_bw()+ggtitle("Annual CPUE for trawler: {{spp}}")+xlab("Longitude")+ylab("Latitude")
+	if(min(pipo$w)!=max(pipo$w)){
+	    plt<-plt+scale_fill_distiller(palette='Spectral',name="CPUE\n(kg.h-1)",trans="log10")
+	}else{
+	    plt<-plt+scale_fill_distiller(palette='Spectral',name="CPUE\n(kg.h-1)")
+	}
+}else{
+ plt<-errorplt+
+    theme_bw()+ggtitle("Annual CPUE for trawler: {{spp}}")+xlab("Longitude")+ylab("Latitude")
+}
+print(plt)
+```
+
+`r figcap(name="csallyeargearmeantrawler{{worms}}",caption="Catches per unit effort per year for trawler. The color scale is log 10 transformed.")`
+
+#### Annual catch per unit effort for gear category net 
+
+```{r csallyeargearmeannet{{worms}},fig.height=10,fig.width=8}
+pipo<-csallyeargearmean%>%filter(spp=="{{spp}}"&gear=="Net")
+if(nrow(pipo)>0){
+plt<-ggplot()+
+    geom_raster(data=pipo,aes(x=x,y=y,fill=w),stat="identity",alpha=1) +
+    borders("world",xlim=rx,ylim=ry,fill="grey",colour=NA,alpha=1)+
+    coord_quickmap(xlim=rx,ylim=ry)+
+    facet_wrap(~year,drop=F,ncol=4)+
+    theme_bw()+ggtitle("Annual CPUE for net: {{spp}}")+xlab("Longitude")+ylab("Latitude")
+	if(min(pipo$w)!=max(pipo$w)){
+	    plt<-plt+scale_fill_distiller(palette='Spectral',name="CPUE\n(kg.h-1)",trans="log10")
+	}else{
+	    plt<-plt+scale_fill_distiller(palette='Spectral',name="CPUE\n(kg.h-1)")
+	}
+}else{
+ plt<-errorplt+
+    theme_bw()+ggtitle("Annual CPUE for net: {{spp}}")+xlab("Longitude")+ylab("Latitude")
+}
+print(plt)
+```
+
+`r figcap(name="csallyeargearmeannet{{worms}}",caption="Catches per unit effort per year for net. The color scale is log 10 transformed.")`
+
+#### Annual catch per unit effort for gear category line 
+
+```{r csallyeargearmeanline{{worms}},fig.height=10,fig.width=8}
+pipo<-csallyeargearmean%>%filter(spp=="{{spp}}"&gear=="Line")
+if(nrow(pipo)>0){
+plt<-ggplot()+
+    geom_raster(data=pipo,aes(x=x,y=y,fill=w),stat="identity",alpha=1) +
+    borders("world",xlim=rx,ylim=ry,fill="grey",colour=NA,alpha=1)+
+    coord_quickmap(xlim=rx,ylim=ry)+
+    facet_wrap(~year,drop=F,ncol=4)+
+    theme_bw()+ggtitle("Annual CPUE for line: {{spp}}")+xlab("Longitude")+ylab("Latitude")
+	if(min(pipo$w)!=max(pipo$w)){
+	    plt<-plt+scale_fill_distiller(palette='Spectral',name="CPUE\n(kg.h-1)",trans="log10")
+	}else{
+	    plt<-plt+scale_fill_distiller(palette='Spectral',name="CPUE\n(kg.h-1)")
+	}
+}else{
+ plt<-errorplt+
+    theme_bw()+ggtitle("Annual CPUE for line: {{spp}}")+xlab("Longitude")+ylab("Latitude")
+}
+print(plt)
+```
+
+`r figcap(name="csallyeargearmeanline{{worms}}",caption="Catches per unit effort per year for line. The color scale is log 10 transformed.")`
+
+
+#### Annual catch per unit effort for gear category other 
+
+```{r csallyeargearmeanother{{worms}},fig.height=10,fig.width=8}
+pipo<-csallyeargearmean%>%filter(spp=="{{spp}}"&gear=="Other")
+if(nrow(pipo)>0){
+plt<-ggplot()+
+    geom_raster(data=pipo,aes(x=x,y=y,fill=w),stat="identity",alpha=1) +
+    borders("world",xlim=rx,ylim=ry,fill="grey",colour=NA,alpha=1)+
+    coord_quickmap(xlim=rx,ylim=ry)+
+    facet_wrap(~year,drop=F,ncol=4)+
+    theme_bw()+ggtitle("Annual CPUE for other: {{spp}}")+xlab("Longitude")+ylab("Latitude")
+	if(min(pipo$w)!=max(pipo$w)){
+	    plt<-plt+scale_fill_distiller(palette='Spectral',name="CPUE\n(kg.h-1)",trans="log10")
+	}else{
+	    plt<-plt+scale_fill_distiller(palette='Spectral',name="CPUE\n(kg.h-1)")
+	}
+}else{
+ plt<-errorplt+
+    theme_bw()+ggtitle("Annual CPUE for other: {{spp}}")+xlab("Longitude")+ylab("Latitude")
+}
+print(plt)
+```
+
+`r figcap(name="csallyeargearmeanother{{worms}}",caption="Catches per unit effort per year for other. The color scale is log 10 transformed.")`
+
+\newpage
+
