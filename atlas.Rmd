@@ -222,6 +222,7 @@ Catch per unit effort are computed using fishing weight divided by the time fish
 An overview of the data is presented in the `r tabcap("tabbase",display="cite")`.
 ```{r tabbase}
 pander(dall)
+write.csv(dall,file="dall.csv",row.names=F)
 ```
 `r tabcap(name="tabbase",caption="Landing (w, in kg), number of sampling in commercial sampling by country (FRA: France, GB_ENG: England) and 
 survey (BTS, FR-CGFS, NS-IBTS) for 2000-2017 by species (taxon: FAO code, name: common name, spp: latin name, worms: worms code).")`
